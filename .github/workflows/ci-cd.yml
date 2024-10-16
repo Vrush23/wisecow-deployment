@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build -t YOUR_DOCKER_USERNAME/wisecow-app:latest .
+          docker push YOUR_DOCKER_USERNAME/wisecow-app:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v1
+        with:
+          namespace: default
+          manifests: |
+            ./k8s/deployment.yaml
+            ./k8s/service.yaml
